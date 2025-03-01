@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Earnings Chart</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://quickchart.io/chart.js"></script>
+</head>
+<body style="background-color: black; color: white; text-align: center;">
+
+    <h2>Bitcoin Earnings Over Time</h2>
+    <img id="chart" width="500">
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://bit4bit-149ee-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        function fetchChartData() {
+            firebase.database().ref("/").once("value").then(snapshot => {
+                let data = snapshot.val();
+                let labels = [];
+                let values = [];
+
+                for (let day in data) {
+                    labels.push(day);
+                    values.push(data[day]);
+                }
+
+                // Generate Chart URL with Firebase Data
+                let chartUrl = `https://quickchart.io/chart?c={
+                    type:'line',
+                    data:{
+                        labels:[${labels.map(label => `'${label}'`)}],
+                        datasets:[{
+                            data:[${values}],
+                            fill:false,
+                            borderColor:'#F5A623',
+                            borderWidth:3,
+                            pointRadius:4
+                        }]
+                    },
+                    options:{
+                        legend:{ display:false },
+                        scales:{
+                            xAxes:[{ gridLines:{ display:false } }],
+                            yAxes:[{ gridLines:{ display:false } }]
+                        }
+                    }
+                }`;
+
+                document.getElementById("chart").src = chartUrl;
+            });
+        }
+
+        fetchChartData();
+    </script>
+
+</body>
+</html>
