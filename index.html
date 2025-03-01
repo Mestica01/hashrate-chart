@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitcoin Earnings Chart</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://quickchart.io/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 </head>
-<body style="background-color: transparent; color: white; text-align: center;">
+<body style="background-color: transparent; text-align: center;">
 
-    <img id="chart" width="200">
+    <img id="chart" width="100%" height="400px">
 
     <script>
-        // Firebase Configuration
+        // 🔥 Firebase Configuration (Replace with your actual Firebase config)
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -24,38 +23,36 @@
             appId: "YOUR_APP_ID"
         };
 
-        // Initialize Firebase
+        // 🔥 Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        function fetchChartData() {
-            firebase.database().ref("/").once("value").then(snapshot => {
-                let data = snapshot.val();
+        // 📊 Fetch data from Firebase and update chart
+        function fetchDataAndUpdateChart() {
+            database.ref("earnings").once("value").then(snapshot => {
+                const data = snapshot.val();
+                if (!data) return;
+
                 let labels = [];
                 let values = [];
 
-                for (let day in data) {
+                Object.keys(data).forEach(day => {
                     labels.push(day);
                     values.push(data[day]);
-                }
+                });
 
-                // Generate Chart URL with Firebase Data
+                // 🎨 Generate the QuickChart.io URL
                 let chartUrl = `https://quickchart.io/chart?c={
                     type:'line',
                     data:{
-                        labels:[${labels.map(label => `'${label}'`)}],
-                        datasets:[{
-                            data:[${values}],
-                            fill:false,
-                            borderColor:'#F5A623',
-                            borderWidth:3,
-                            pointRadius:4
-                        }]
+                        labels:[${labels.map(d => `'${d}'`)}],
+                        datasets:[{data:[${values}],borderColor:'#f5a623',borderWidth:4}]
                     },
                     options:{
-                        legend:{ display:false },
+                        legend:{display:false},
                         scales:{
-                            xAxes:[{ gridLines:{ display:false } }],
-                            yAxes:[{ gridLines:{ display:false } }]
+                            xAxes:[{display:true,gridLines:{display:false}}],
+                            yAxes:[{display:true,gridLines:{display:false}}]
                         }
                     }
                 }`;
@@ -64,8 +61,8 @@
             });
         }
 
-        fetchChartData();
+        // 🔄 Load the chart when the page loads
+        fetchDataAndUpdateChart();
     </script>
-
 </body>
 </html>
